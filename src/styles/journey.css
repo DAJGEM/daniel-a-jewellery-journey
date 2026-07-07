@@ -507,3 +507,23 @@
 .faq-item { border-top: 1px solid rgba(212,175,55,0.18); padding: 1.2rem 0; }
 .faq-item h3 { font-family: 'Cormorant Garamond', serif; font-size: 1.35rem; color: var(--gold-bright); margin: 0 0 0.5rem; }
 .faq-item p { margin: 0; color: var(--paper); font-size: 0.95rem; }
+
+/* ---------- Theme insulation ----------
+   Embedded in an unknown Squarespace theme, so force our own colours/typography
+   inside #journey-root against the host's heading/paragraph/button rules. */
+#journey-root, #journey-root * { box-sizing: border-box; }
+#journey-root h1, #journey-root h2 { color: var(--paper) !important; }
+#journey-root .act-subtitle { color: var(--gold-bright) !important; }
+#journey-root .act-kicker, #journey-root .pill-group-label { color: var(--gold) !important; }
+#journey-root .act-lede { color: var(--paper) !important; }
+#journey-root .act-body, #journey-root .act-note-link, #journey-root .faq-item p { color: var(--muted) !important; }
+#journey-root .faq-item h3 { color: var(--gold-bright) !important; }
+#journey-root .gram-counter, #journey-root .temp-readout, #journey-root .purity-stamp,
+#journey-root .alloy-value strong, #journey-root .ticker-values, #journey-root .calc-grams,
+#journey-root .micro-hallmark, #journey-root .micro-inscription { color: var(--gold-bright) !important; }
+#journey-root p { margin-top: 0; }
+#journey-root a.journey-link { color: var(--gold-bright) !important; }
+#journey-root .sr-cta, #journey-root .pill.is-active, #journey-root .engrave-btn,
+#journey-root .place-btn, #journey-root .journey-cta { color: var(--ink) !important; }
+/* Squarespace injects link/heading underlines and letterspacing; neutralise. */
+#journey-root a { text-decoration: none; }

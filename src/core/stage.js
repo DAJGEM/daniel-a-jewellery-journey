@@ -26,11 +26,15 @@ export function createStage(holderEl, quality) {
   let visible = true;
   let lastTime = performance.now();
 
+  // Render while any part of the experience is on screen. Observe the whole
+  // (non-sticky) experience container, not the sticky canvas — inside a CMS
+  // page the sticky element's intersection can read stale. Default to visible
+  // so a slow/misfiring observer never leaves the canvas frozen.
   const io = new IntersectionObserver(
-    (entries) => { visible = entries[0].isIntersecting; },
-    { rootMargin: '100px' },
+    (entries) => { if (entries.length) visible = entries[entries.length - 1].isIntersecting; },
+    { rootMargin: '200px' },
   );
-  io.observe(holderEl);
+  io.observe(holderEl.parentElement || holderEl);
 
   function size() {
     return { w: holderEl.clientWidth, h: holderEl.clientHeight };
