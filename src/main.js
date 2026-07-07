@@ -7,6 +7,11 @@ import { wireScroll, scrollToSection } from './core/scroll.js';
 import { createState } from './core/state.js';
 import { buildForm } from './lib/geometry.js';
 import { createParticles } from './lib/particles.js';
+import { createHeroAct } from './acts/act01-hero.js';
+import { createMineAct } from './acts/act02-mine.js';
+import { createPurifyAct } from './acts/act03-purify.js';
+import { createAlloyAct } from './acts/act04-alloy.js';
+import { createCastAct } from './acts/act05-cast.js';
 
 // Dev-only: `?gallery=1` renders every form + a particle kind for eyeballing.
 function galleryAct(sectionEl) {
@@ -117,11 +122,23 @@ function boot() {
       return;
     }
 
-    stage.registerAct(makeStubAct('stub-a', sections[0], 0xf3cb7a));
-    stage.registerAct(makeStubAct('stub-b', sections[1], 0x3355ff));
+    // Real acts, section by section. Later acts arrive in the next batch and
+    // fall back to a placeholder stub until then.
+    const builders = [
+      (el) => createHeroAct(el),
+      (el) => createMineAct(el, state),
+      (el) => createPurifyAct(el, state),
+      (el) => createAlloyAct(el, state),
+      (el) => createCastAct(el, state),
+    ];
+    const stubColours = [0xf3cb7a, 0xe9e8e4, 0xe7a186, 0x9fd0ff, 0xf3cb7a];
+    sections.forEach((el, i) => {
+      if (builders[i]) stage.registerAct(builders[i](el));
+      else stage.registerAct(makeStubAct('stub-' + i, el, stubColours[i % stubColours.length]));
+    });
 
     wireScroll(stage);
-    stage.setActive('stub-a');
+    stage.setActive('hero');
 
     document.getElementById('begin-journey')?.addEventListener('click', () => {
       scrollToSection(sections[1]);
