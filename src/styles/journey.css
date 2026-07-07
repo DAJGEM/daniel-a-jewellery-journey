@@ -250,3 +250,8 @@
   .ds-specs { grid-template-columns: 1fr 1fr; }
   .ds-compare-row { grid-template-columns: repeat(5, 1fr); gap: 0.3rem; }
 }
+
+/* Melting Pot — scientific bio block */
+.mp-science { background: rgba(207,214,223,0.06); border-left: 3px solid var(--platinum); border-radius: 8px; padding: 0.7rem 1rem; margin-bottom: 0.8rem; }
+.mp-science-by { display: block; font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--platinum) !important; margin-bottom: 0.2rem; }
+.mp-science p { margin: 0; color: var(--paper) !important; font-size: 0.9rem; }

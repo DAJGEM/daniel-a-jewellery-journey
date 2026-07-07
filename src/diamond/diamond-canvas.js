@@ -70,25 +70,42 @@ export function createDiamondCanvas(canvas) {
   }
 
   // ---------- colour helpers ----------
-  const DARK = [16, 24, 38];
+  const DARK = [7, 12, 22];   // near-black facets, like a real stone
   function parse(h) { const s = h.replace('#', ''); return [parseInt(s.slice(0, 2), 16), parseInt(s.slice(2, 4), 16), parseInt(s.slice(4, 6), 16)]; }
   function facetShade(v, e, colTint) {
     // v: 0 (dark facet, away from light) → 1 (bright facet, toward light)
     v = Math.max(0, Math.min(1, v));
+    const spec = v > 0.86 ? (v - 0.86) / 0.14 : 0; // blown-out specular near the light
     const bright = [
-      235 + (colTint[0] - 255) * 0.5 - e.warmth * -10,
-      240 + (colTint[1] - 255) * 0.5,
-      248 + (colTint[2] - 255) * 0.5 + e.warmth * -18,
-    ].map((n) => Math.max(0, Math.min(255, n * (0.7 + e.intensity * 0.35))));
-    const r = DARK[0] + (bright[0] - DARK[0]) * v;
-    const g = DARK[1] + (bright[1] - DARK[1]) * v;
-    const b = DARK[2] + (bright[2] - DARK[2]) * v;
-    return `rgb(${r | 0},${g | 0},${b | 0})`;
+      238 + (colTint[0] - 255) * 0.45 + e.warmth * 8,
+      242 + (colTint[1] - 255) * 0.45,
+      250 + (colTint[2] - 255) * 0.45 - e.warmth * 16,
+    ].map((n) => Math.max(0, Math.min(255, n * (0.72 + e.intensity * 0.34))));
+    let r = DARK[0] + (bright[0] - DARK[0]) * v;
+    let g = DARK[1] + (bright[1] - DARK[1]) * v;
+    let b = DARK[2] + (bright[2] - DARK[2]) * v;
+    r += (255 - r) * spec; g += (255 - g) * spec; b += (255 - b) * spec; // push to white
+    return [r | 0, g | 0, b | 0];
   }
-  function fillFacet(pts, v, e, colTint) {
-    ctx.beginPath(); pts.forEach((p, i) => (i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1]))); ctx.closePath();
-    ctx.fillStyle = facetShade(v, e, colTint); ctx.fill();
-    ctx.strokeStyle = 'rgba(10,16,26,0.55)'; ctx.lineWidth = 0.75; ctx.stroke();
+  const rgb = (a) => `rgb(${a[0]},${a[1]},${a[2]})`;
+  const FIRE = [[90, 180, 255], [255, 120, 200], [120, 255, 190], [255, 190, 90]]; // dispersion tints
+  function fillFacet(pts, v, e, colTint, fire) {
+    let minx = 1e9, miny = 1e9, maxx = -1e9, maxy = -1e9;
+    ctx.beginPath();
+    pts.forEach((p, i) => { (i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1])); minx = Math.min(minx, p[0]); miny = Math.min(miny, p[1]); maxx = Math.max(maxx, p[0]); maxy = Math.max(maxy, p[1]); });
+    ctx.closePath();
+    // gradient across the facet gives each face dimension
+    const g = ctx.createLinearGradient(minx, miny, maxx, maxy);
+    g.addColorStop(0, rgb(facetShade(v + 0.14, e, colTint)));
+    g.addColorStop(1, rgb(facetShade(v - 0.14, e, colTint)));
+    ctx.fillStyle = g; ctx.fill();
+    // subtle dispersion fire on some bright facets
+    if (fire > 0 && v > 0.62) {
+      const c = FIRE[fire % FIRE.length];
+      ctx.fillStyle = `rgba(${c[0]},${c[1]},${c[2]},${Math.min(0.28, (v - 0.62) * e.fire * 0.9)})`;
+      ctx.fill();
+    }
+    ctx.strokeStyle = 'rgba(6,10,18,0.6)'; ctx.lineWidth = 0.7; ctx.stroke();
   }
 
   // ---------- facet builders (return {pts, ang}) ----------
@@ -104,7 +121,14 @@ export function createDiamondCanvas(canvas) {
       O.push(ell(cx, cy, rw, rl, k * 45, 1.0));         // outline at mains
       OV.push(ell(cx, cy, rw, rl, k * 45 + 22.5, 1.0)); // outline at valleys
     }
-    facets.push({ pts: T, ang: 0, table: true });
+    // Pavilion reflection seen through the table — the dark 8-pointed star that
+    // makes a round brilliant read as real, rather than a flat bright top.
+    const C = [cx, cy];
+    for (let k = 0; k < N; k++) {
+      const Tm = [(T[k][0] + T[(k + 1) % 8][0]) / 2, (T[k][1] + T[(k + 1) % 8][1]) / 2];
+      facets.push({ pts: [C, T[k], Tm], ang: k * 45 + 11, pav: true });
+      facets.push({ pts: [C, Tm, T[(k + 1) % 8]], ang: k * 45 + 34, pav: true });
+    }
     for (let k = 0; k < N; k++) {
       facets.push({ pts: [T[k], GV[(k + 7) % 8], GM[k], GV[k]], ang: k * 45 });                 // bezel/kite (8)
       facets.push({ pts: [T[k], T[(k + 1) % 8], GV[k]], ang: k * 45 + 22.5 });                  // star (8)
@@ -173,16 +197,16 @@ export function createDiamondCanvas(canvas) {
     outline(cx, cy, r); ctx.clip();
 
     const facets = buildFacets(cx, cy, r);
-    for (const f of facets) {
+    facets.forEach((f, idx) => {
+      const a = f.ang * Math.PI / 180;
       let v;
-      if (f.table) v = 0.62 + 0.12 * Math.cos(light * 0.7);
-      else {
-        const a = f.ang * Math.PI / 180;
-        v = 0.5 + 0.5 * Math.cos(2 * a - light + (f.step || 0) * 1.1 + (f.wind ? 1.6 : 0));
-      }
+      if (f.pav) v = 0.16 + 0.62 * Math.pow(Math.abs(Math.cos(4 * a - light * 0.3)), 1.6); // dark 8-point star
+      else if (f.table) v = 0.6 + 0.1 * Math.cos(light * 0.6);
+      else v = 0.5 + 0.5 * Math.cos(2 * a - light + (f.step || 0) * 1.05 + (f.wind ? 1.6 : 0));
       v = 0.5 + (v - 0.5) * (contrast / 1.5);           // apply cut contrast around mid
-      fillFacet(f.pts, v, e, colTint);
-    }
+      const fire = idx % 5 === 0 ? (idx % 4) + 1 : 0;   // scattered dispersion, not on every facet
+      fillFacet(f.pts, v, e, colTint, fire);
+    });
 
     // poor-cut "window": a flat, lifeless centre where light leaks out the back
     if (leak > 0.14) {

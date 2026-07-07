@@ -164,6 +164,7 @@ export function createFoundry(mount, config = {}) {
           ${value != null ? `<div><span>Melt value</span><strong>${fmtCAD(value)}</strong></div>` : ''}
         </div>
         <div class="mp-verdict"><span class="mp-verdict-by">Daniel’s verdict</span><p>${r.verdict}</p></div>
+        <div class="mp-science"><span class="mp-science-by">The science</span><p>${r.bio}</p></div>
         ${r.facts.map((f) => `<p class="mp-fact">${f}</p>`).join('')}
         <a class="mp-cta" href="${contactUrl}">Have Daniel cast this for real →</a>
       </div>`;

@@ -8,6 +8,56 @@ import { RECIPES } from '../data/recipes.js';
 const TROY_OZ_GRAMS = 31.1035;
 const JEWELLERY_GOLD_MIN = 41.7; // 10K
 
+// Real alloy density (g/cm³) from mass fractions: ρ = 100 / Σ(wt% / ρ_i).
+export function alloyDensity(mix) {
+  const total = Object.values(mix).reduce((a, b) => a + (b || 0), 0);
+  if (total <= 0) return 0;
+  let inv = 0;
+  for (const k of Object.keys(mix)) if (mix[k]) inv += (mix[k] / total) / METALS[k].density;
+  return 1 / inv;
+}
+
+// Mass-weighted melting estimate. Real alloys melt over a range near or below
+// this; we present it as an approximate liquidus for teaching.
+export function meltingApprox(mix) {
+  const total = Object.values(mix).reduce((a, b) => a + (b || 0), 0);
+  if (total <= 0) return 0;
+  let m = 0;
+  for (const k of Object.keys(mix)) if (mix[k]) m += (mix[k] / total) * METALS[k].meltC;
+  return Math.round(m);
+}
+
+const ROLE = {
+  au: 'gold sets the colour and never tarnishes',
+  ag: 'silver whitens and cools the colour',
+  cu: 'copper adds hardness and a warm, reddening tone',
+  zn: 'zinc lowers the melting point and lightens the colour',
+  ni: 'nickel is a hard, cheap whitener (a common skin allergen)',
+  pd: 'palladium bleaches the alloy white and is hypoallergenic',
+  pt: 'platinum brings density, a natural white and hardness',
+  sn: 'tin hardens copper into bronze',
+  al: 'aluminium forms a hard, brittle intermetallic',
+  pb: 'lead is soft, dense and toxic — never used on skin',
+};
+
+// A factual, scientific bio of exactly what was poured.
+function scientificBio(mix, pct, family, karat, colour) {
+  const total = Object.values(mix).reduce((a, b) => a + (b || 0), 0);
+  const parts = Object.entries(pct).sort((a, b) => b[1] - a[1]);
+  const byWeight = parts.map(([k, v]) => `${v.toFixed(1)}% ${METALS[k].name.toLowerCase()} (${METALS[k].symbol})`).join(', ');
+  const density = alloyDensity(mix).toFixed(1);
+  const melt = meltingApprox(mix);
+  const roles = parts.slice(0, 3).map(([k]) => ROLE[k]).filter(Boolean).join('; ');
+  let head;
+  if (family === 'gold') head = `A ${karat}-karat gold alloy — ${Math.round(pct.au)}% pure gold by weight, the rest added for strength and colour.`;
+  else if (family === 'silver') head = 'A silver-based alloy.';
+  else if (family === 'platinum') head = 'A platinum-group alloy.';
+  else if (family === 'brass') head = 'Brass — a copper–zinc alloy with no gold content.';
+  else if (family === 'bronze') head = 'Bronze — a copper–tin alloy, humanity’s first engineered metal.';
+  else head = 'A base-metal alloy with little or no precious content.';
+  return `${head} By weight: ${byWeight}. Calculated density ≈ ${density} g/cm³; approximate melting point ≈ ${melt} °C. In the mix, ${roles}.`;
+}
+
 function percentages(mix) {
   const total = Object.values(mix).reduce((a, b) => a + (b || 0), 0);
   if (total <= 0) return { total: 0, pct: {} };
@@ -112,10 +162,12 @@ export function solveAlloy(mix) {
   facts.push('Your recipe: ' + dom.map(([k, v]) => `${Math.round(v)}% ${METALS[k].name.toLowerCase()}`).join(', ') + '.');
   if (family === 'gold') facts.push(`Karat is just gold content: ${Math.round(au)}% gold ≈ ${karat}K (pure gold is 24K).`);
   const verdict = verdictFor({ family, colour, karat, pct, recognized });
+  const bio = scientificBio(mix, pct, family, karat, colour);
 
   return {
     family, total, pct, karat, colour, colourHex: COLOUR_HEX[colour] || 0xb7b2a6,
     title, recognized, hardness, wearable, verdict, facts,
+    density: Math.round(alloyDensity(mix) * 10) / 10, meltingC: meltingApprox(mix), bio,
   };
 }
 
