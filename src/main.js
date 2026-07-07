@@ -1,177 +1,38 @@
-// Boot: capability check → stage → acts → scroll. Failure of any kind leaves
-// the page as readable static content (class `journey-static`).
+// The Melting Pot — boot. Builds the interactive foundry inside its mount and
+// wires the service CTAs. Degrades to the static (crawlable) content if the
+// browser can't run the workbench.
 
-import { detectQuality } from './core/quality.js';
-import { createStage } from './core/stage.js';
-import { wireScroll, scrollToSection } from './core/scroll.js';
-import { createState } from './core/state.js';
-import { buildForm } from './lib/geometry.js';
-import { createParticles } from './lib/particles.js';
-import { createHeroAct } from './acts/act01-hero.js';
-import { createMineAct } from './acts/act02-mine.js';
-import { createPurifyAct } from './acts/act03-purify.js';
-import { createAlloyAct } from './acts/act04-alloy.js';
-import { createCastAct } from './acts/act05-cast.js';
-import { createFinishAct } from './acts/act06-finish.js';
-import { createStonesAct } from './acts/act07-stones.js';
-import { createMicroscopeAct } from './acts/act08-microscope.js';
-import { createTestAct } from './acts/act09-test.js';
-import { createShowroomAct } from './acts/act10-showroom.js';
-import { createHud } from './ui/hud.js';
-import { createAudio } from './ui/audio.js';
+import { createFoundry } from './melting/foundry.js';
 
-// Dev-only: `?gallery=1` renders every form + a particle kind for eyeballing.
-function galleryAct(sectionEl) {
-  let scene; let camera; let group; let embers; let t = 0;
-  const forms = ['ring', 'pendant', 'chain', 'bracelet', 'earrings'];
-  let idx = 0;
-  return {
-    id: 'gallery',
-    sectionEl,
-    scene: null,
-    camera: null,
-    init(ctx) {
-      const { THREE, envMap, size } = ctx;
-      scene = new THREE.Scene();
-      scene.background = new THREE.Color(0x0a0a0c);
-      scene.environment = envMap;
-      camera = new THREE.PerspectiveCamera(45, size.w / size.h, 0.1, 100);
-      camera.position.set(0, 0, 6);
-      const key = new THREE.DirectionalLight(0xffffff, 2.5);
-      key.position.set(3, 5, 4); scene.add(key);
-      this._THREE = THREE;
-      this.load('ring');
-      embers = createParticles(THREE, { kind: 'embers', count: 200, area: 6, quality: ctx.quality });
-      scene.add(embers.points);
-      this.scene = scene; this.camera = camera;
-      window.addEventListener('keydown', (e) => {
-        if (e.key === ' ') { idx = (idx + 1) % forms.length; this.load(forms[idx]); }
-      });
-    },
-    load(form) {
-      if (group) scene.remove(group);
-      group = buildForm(this._THREE, form, { alloyKey: 'gold-18k-yellow', finish: 'mirror', stoneKey: 'natural-diamond', stoneCarat: 1 });
-      scene.add(group);
-    },
-    update(_p, dt) { t += dt; group.rotation.y = t * 0.6; embers.update(dt); },
-  };
-}
-
-function supportsWebGL2() {
-  try {
-    const c = document.createElement('canvas');
-    return !!c.getContext('webgl2');
-  } catch {
-    return false;
-  }
-}
-
-function makeStubAct(id, sectionEl, colour) {
-  let scene; let camera; let mesh;
-  return {
-    id,
-    sectionEl,
-    scene: null,
-    camera: null,
-    init(ctx) {
-      const { THREE, envMap, size } = ctx;
-      scene = new THREE.Scene();
-      scene.background = new THREE.Color(0x0a0a0c);
-      scene.environment = envMap;
-      camera = new THREE.PerspectiveCamera(45, size.w / size.h, 0.1, 100);
-      camera.position.set(0, 0, 5);
-      const geo = id === 'stub-a'
-        ? new THREE.TorusGeometry(1.2, 0.4, 48, 96)
-        : new THREE.BoxGeometry(1.6, 1.6, 1.6);
-      const mat = new THREE.MeshStandardMaterial({ color: colour, metalness: 1, roughness: 0.15 });
-      mesh = new THREE.Mesh(geo, mat);
-      scene.add(mesh);
-      this.scene = scene;
-      this.camera = camera;
-    },
-    update(progress, dt) {
-      mesh.rotation.y += dt * 0.6;
-      mesh.rotation.x = progress * Math.PI;
-    },
-    dispose() {
-      mesh.geometry.dispose();
-      mesh.material.dispose();
-      this.scene = null;
-    },
-  };
+function supportsCanvas() {
+  try { return !!document.createElement('canvas').getContext('2d'); } catch { return false; }
 }
 
 function boot() {
-  const root = document.getElementById('journey-root');
-  const holder = document.getElementById('journey-canvas-holder');
-  if (!root || !holder) return;
+  const root = document.getElementById('melting-pot-root');
+  if (!root) return;
 
-  const params = new URLSearchParams(location.search);
-  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const cfg = (window.JOURNEY_CONFIG || window.MELTING_POT_CONFIG || {});
+  const contactUrl = cfg.contactUrl || '/contact';
 
-  if (!supportsWebGL2() || reducedMotion || params.get('static') === '1') {
-    root.classList.add('journey-static');
+  // Point every service link at the real contact/booking page.
+  root.querySelectorAll('a[data-link="contact"]').forEach((a) => a.setAttribute('href', contactUrl));
+
+  const mount = document.getElementById('mp-workbench');
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  if (!mount || !supportsCanvas() || reduced) {
+    root.classList.add('mp-static');
     return;
   }
 
   try {
-    const quality = detectQuality();
-    const state = createState();
-    const stage = createStage(holder, quality);
-
-    const sections = [...root.querySelectorAll('.journey-act')];
-
-    if (params.get('gallery') === '1') {
-      stage.registerAct(galleryAct(sections[0]));
-      wireScroll(stage);
-      stage.setActive('gallery');
-      window.__journey = { stage, state };
-      return;
-    }
-
-    // All ten acts, section by section.
-    const builders = [
-      (el) => createHeroAct(el),
-      (el) => createMineAct(el, state),
-      (el) => createPurifyAct(el, state),
-      (el) => createAlloyAct(el, state),
-      (el) => createCastAct(el, state),
-      (el) => createFinishAct(el, state),
-      (el) => createStonesAct(el, state),
-      (el) => createMicroscopeAct(el, state),
-      (el) => createTestAct(el, state),
-      (el) => createShowroomAct(el, state),
-    ];
-    sections.forEach((el, i) => {
-      if (builders[i]) stage.registerAct(builders[i](el));
-    });
-
-    const hud = createHud(root, sections);
-    createAudio(root);
-
-    // Point every service link at the configured contact/booking page.
-    const contactHref = (window.JOURNEY_CONFIG && window.JOURNEY_CONFIG.contactUrl) || '/contact';
-    root.querySelectorAll('.journey-link[data-link="contact"]').forEach((a) => {
-      a.setAttribute('href', contactHref);
-    });
-
-    wireScroll(stage, (i) => hud.setActive(i));
-    stage.setActive('hero');
-    hud.setActive(0);
-
-    document.getElementById('begin-journey')?.addEventListener('click', () => {
-      scrollToSection(sections[1]);
-    });
-
-    window.__journey = { stage, state }; // dev hook, used by verification
+    window.__meltingpot = createFoundry(mount, { contactUrl });
   } catch (err) {
-    console.error('journey boot failed, falling back to static', err);
-    root.classList.add('journey-static');
+    console.error('Melting Pot failed to start, showing static content', err);
+    root.classList.add('mp-static');
   }
 }
 
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', boot);
-} else {
-  boot();
-}
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+else boot();
