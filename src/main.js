@@ -11,6 +11,7 @@ function supportsCanvas() {
 function boot() {
   const root = document.getElementById('melting-pot-root');
   if (!root) return;
+  if (window.__meltingpot) return; // guard against the host running us twice
 
   const cfg = (window.JOURNEY_CONFIG || window.MELTING_POT_CONFIG || {});
   const contactUrl = cfg.contactUrl || '/contact';

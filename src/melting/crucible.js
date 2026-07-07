@@ -57,11 +57,20 @@ export function createCrucible(canvas) {
     tempC = 20; phaseT = 0;
   }
 
+  let watchdog = null;
   function smelt(alloyColourHex, done) {
     if (phase !== 'idle' || grains.length === 0) { done?.(); return; }
     coolTarget = alloyColourHex;
     onDone = done;
     phase = 'heating'; phaseT = 0; tempC = 20;
+    // Safety: never let a melt hang. Force-finish if the sequence overruns.
+    clearTimeout(watchdog);
+    watchdog = setTimeout(() => {
+      if (phase !== 'solid' && phase !== 'idle') {
+        phase = 'solid'; phaseT = 0; tempC = 20;
+        const cb = onDone; onDone = null; cb?.();
+      }
+    }, 7000);
   }
 
   // Physics + phase machine
