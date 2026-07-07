@@ -16,10 +16,11 @@ async function getJson(fetchImpl, url) {
 }
 
 export async function fetchSpotPrices(fetchImpl = fetch) {
-  const [gold, silver, platinum, fx] = await Promise.allSettled([
+  const [gold, silver, platinum, palladium, fx] = await Promise.allSettled([
     getJson(fetchImpl, METAL_URL('XAU')),
     getJson(fetchImpl, METAL_URL('XAG')),
     getJson(fetchImpl, METAL_URL('XPT')),
+    getJson(fetchImpl, METAL_URL('XPD')),
     getJson(fetchImpl, FX_URL),
   ]);
 
@@ -39,6 +40,7 @@ export async function fetchSpotPrices(fetchImpl = fetch) {
     gold: goldOut,
     silver: metal(silver),
     platinum: metal(platinum),
+    palladium: metal(palladium),
     usdCad,
     fetchedAt: Date.now(),
   };
