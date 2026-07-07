@@ -5,6 +5,45 @@ import { detectQuality } from './core/quality.js';
 import { createStage } from './core/stage.js';
 import { wireScroll, scrollToSection } from './core/scroll.js';
 import { createState } from './core/state.js';
+import { buildForm } from './lib/geometry.js';
+import { createParticles } from './lib/particles.js';
+
+// Dev-only: `?gallery=1` renders every form + a particle kind for eyeballing.
+function galleryAct(sectionEl) {
+  let scene; let camera; let group; let embers; let t = 0;
+  const forms = ['ring', 'pendant', 'chain', 'bracelet', 'earrings'];
+  let idx = 0;
+  return {
+    id: 'gallery',
+    sectionEl,
+    scene: null,
+    camera: null,
+    init(ctx) {
+      const { THREE, envMap, size } = ctx;
+      scene = new THREE.Scene();
+      scene.background = new THREE.Color(0x0a0a0c);
+      scene.environment = envMap;
+      camera = new THREE.PerspectiveCamera(45, size.w / size.h, 0.1, 100);
+      camera.position.set(0, 0, 6);
+      const key = new THREE.DirectionalLight(0xffffff, 2.5);
+      key.position.set(3, 5, 4); scene.add(key);
+      this._THREE = THREE;
+      this.load('ring');
+      embers = createParticles(THREE, { kind: 'embers', count: 200, area: 6, quality: ctx.quality });
+      scene.add(embers.points);
+      this.scene = scene; this.camera = camera;
+      window.addEventListener('keydown', (e) => {
+        if (e.key === ' ') { idx = (idx + 1) % forms.length; this.load(forms[idx]); }
+      });
+    },
+    load(form) {
+      if (group) scene.remove(group);
+      group = buildForm(this._THREE, form, { alloyKey: 'gold-18k-yellow', finish: 'mirror', stoneKey: 'natural-diamond', stoneCarat: 1 });
+      scene.add(group);
+    },
+    update(_p, dt) { t += dt; group.rotation.y = t * 0.6; embers.update(dt); },
+  };
+}
 
 function supportsWebGL2() {
   try {
@@ -69,6 +108,15 @@ function boot() {
     const stage = createStage(holder, quality);
 
     const sections = [...root.querySelectorAll('.journey-act')];
+
+    if (params.get('gallery') === '1') {
+      stage.registerAct(galleryAct(sections[0]));
+      wireScroll(stage);
+      stage.setActive('gallery');
+      window.__journey = { stage, state };
+      return;
+    }
+
     stage.registerAct(makeStubAct('stub-a', sections[0], 0xf3cb7a));
     stage.registerAct(makeStubAct('stub-b', sections[1], 0x3355ff));
 
