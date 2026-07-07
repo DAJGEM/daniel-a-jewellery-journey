@@ -178,3 +178,75 @@
 @media (max-width: 460px) {
   .mp-rack { grid-template-columns: repeat(3, 1fr); }
 }
+
+/* ---------- Top explainer + chapter intros ---------- */
+.mp-whatis { max-width: 40rem; margin: 0.5rem auto 0; color: var(--paper) !important; font-size: 1.05rem; }
+.mp-whatis strong { color: var(--gold-bright) !important; }
+.mp-chapter-intro, .ds-chapter { max-width: 66rem; margin: 2.5rem auto 0; padding: 0 clamp(1rem, 3vw, 2rem); text-align: center; }
+.mp-chapter-intro .mp-lede, .ds-chapter .mp-lede { max-width: 42rem; margin: 0.4rem auto 1.5rem; color: var(--muted) !important; }
+#melting-pot-root .ds-chapter h2, #melting-pot-root .mp-chapter-intro h2 { font-size: clamp(1.9rem, 5vw, 3rem); }
+
+/* ---------- Diamond Studio ---------- */
+.ds-chapter { margin-top: 4rem; }
+#ds-studio { margin-top: 1.5rem; text-align: left; }
+.ds-shapes { display: grid; grid-template-columns: repeat(10, 1fr); gap: 0.5rem; margin-bottom: 1.4rem; }
+.ds-shape { display: flex; flex-direction: column; align-items: center; gap: 0.3rem; background: linear-gradient(180deg, var(--panel-2), var(--panel)); border: 1px solid var(--line); border-radius: 12px; padding: 0.5rem 0.2rem; cursor: pointer; transition: transform 0.12s, border-color 0.2s; }
+.ds-shape:hover { transform: translateY(-2px); border-color: var(--gold); }
+.ds-shape.is-active { border-color: var(--gold-bright); box-shadow: 0 0 0 1px var(--gold-bright), 0 8px 20px rgba(0,0,0,0.4); }
+.ds-shape:focus-visible { outline: 2px solid var(--gold-bright); outline-offset: 2px; }
+.ds-shape-mini { width: 44px; height: 44px; }
+.ds-shape-label { font-size: 0.6rem; color: var(--muted); text-align: center; line-height: 1.1; }
+
+.ds-stage { display: grid; grid-template-columns: 1.25fr 1fr; gap: 1.2rem; }
+.ds-viewer { position: relative; background: radial-gradient(80% 60% at 50% 30%, #1c2130, #0b0d13); border: 1px solid var(--line); border-radius: 16px; padding: 0.5rem; display: flex; flex-direction: column; min-height: 340px; }
+.ds-canvas { width: 100%; flex: 1; min-height: 260px; display: block; border-radius: 12px; }
+.ds-env-label { position: absolute; top: 0.8rem; left: 1rem; font-size: 0.7rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--gold-bright); opacity: 0.85; }
+.ds-envs { display: flex; flex-wrap: wrap; gap: 0.35rem; margin-top: 0.5rem; }
+.ds-env { font-size: 0.66rem; color: var(--paper); background: rgba(255,255,255,0.05); border: 1px solid var(--line); border-radius: 999px; padding: 0.35rem 0.7rem; cursor: pointer; }
+.ds-env:hover { border-color: var(--gold); }
+.ds-env.is-active { background: linear-gradient(160deg, var(--gold-bright), var(--gold)); color: var(--ink) !important; border-color: transparent; }
+.ds-env:focus-visible { outline: 2px solid var(--gold-bright); outline-offset: 2px; }
+
+.ds-panel { background: linear-gradient(180deg, var(--panel-2), var(--panel)); border: 1px solid var(--line); border-radius: 16px; padding: 1.2rem; display: flex; flex-direction: column; gap: 0.8rem; }
+.ds-title-row { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; }
+#melting-pot-root .ds-shape-name { font-size: 1.6rem; margin: 0; color: var(--paper) !important; }
+.ds-score { font-family: 'Cormorant Garamond', serif; font-size: 1.5rem; color: var(--gold-bright) !important; background: rgba(212,175,55,0.12); border: 1px solid var(--line); border-radius: 10px; padding: 0.1rem 0.6rem; }
+.ds-specs { display: grid; grid-template-columns: 1fr 1fr; gap: 0.4rem 1rem; }
+.ds-specs > div { display: flex; flex-direction: column; border-top: 1px solid var(--line); padding-top: 0.3rem; }
+.ds-specs span { font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
+.ds-specs strong { color: var(--paper); font-weight: 500; font-size: 0.9rem; }
+.ds-price { grid-column: 1 / -1; }
+.ds-price strong { color: var(--gold-bright) !important; font-family: 'Cormorant Garamond', serif; font-size: 1.3rem; }
+.ds-controls { display: flex; flex-direction: column; gap: 0.6rem; }
+.ds-pillgroup { display: flex; flex-direction: column; gap: 0.35rem; }
+.ds-pilllabel { font-size: 0.64rem; text-transform: uppercase; letter-spacing: 0.14em; color: var(--gold) !important; }
+.ds-pilllabel b { color: var(--gold-bright); }
+.ds-pillrow { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+.ds-pill { font-size: 0.72rem; color: var(--paper); background: rgba(255,255,255,0.05); border: 1px solid var(--line); border-radius: 999px; padding: 0.35rem 0.75rem; cursor: pointer; }
+.ds-pill:hover { border-color: var(--gold); }
+.ds-pill.is-active { background: linear-gradient(160deg, var(--gold-bright), var(--gold)); color: var(--ink) !important; border-color: transparent; }
+.ds-pill:focus-visible { outline: 2px solid var(--gold-bright); outline-offset: 2px; }
+.ds-carat { -webkit-appearance: none; appearance: none; width: 100%; height: 6px; border-radius: 3px; background: linear-gradient(90deg, var(--gold), rgba(255,255,255,0.1)); }
+.ds-carat::-webkit-slider-thumb { -webkit-appearance: none; width: 20px; height: 20px; border-radius: 50%; background: var(--gold-bright); cursor: pointer; border: 2px solid #1a1408; }
+.ds-carat::-moz-range-thumb { width: 20px; height: 20px; border-radius: 50%; background: var(--gold-bright); cursor: pointer; border: 2px solid #1a1408; }
+.ds-gem { background: rgba(255,122,26,0.07); border-left: 3px solid var(--ember); border-radius: 8px; padding: 0.6rem 0.9rem; }
+.ds-gem-by { display: block; font-size: 0.64rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--gold-bright) !important; margin-bottom: 0.2rem; }
+.ds-gem p { margin: 0; color: var(--paper) !important; font-size: 0.92rem; }
+.ds-cta { font-weight: 600; font-size: 0.82rem; color: var(--gold-bright) !important; }
+.ds-cta:hover { color: var(--paper) !important; }
+
+.ds-compare { max-width: 66rem; margin: 1.4rem auto 0; padding: 0 clamp(1rem, 3vw, 2rem); }
+.ds-compare-label { text-align: center; text-transform: uppercase; letter-spacing: 0.12em; font-size: 0.66rem; color: var(--gold) !important; margin-bottom: 0.7rem; }
+.ds-compare-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0.6rem; }
+.ds-cmp-cell { display: flex; flex-direction: column; align-items: center; gap: 0.3rem; }
+.ds-cmp-canvas { width: 100%; aspect-ratio: 1; background: radial-gradient(70% 60% at 50% 35%, #1c2130, #0b0d13); border: 1px solid var(--line); border-radius: 10px; }
+.ds-cmp-name { font-size: 0.64rem; color: var(--muted); }
+
+.ds-static #ds-studio .ds-shapes, .ds-static #ds-studio .ds-stage, .ds-static .ds-compare { display: none; }
+
+@media (max-width: 720px) {
+  .ds-stage { grid-template-columns: 1fr; }
+  .ds-shapes { grid-template-columns: repeat(5, 1fr); }
+  .ds-specs { grid-template-columns: 1fr 1fr; }
+  .ds-compare-row { grid-template-columns: repeat(5, 1fr); gap: 0.3rem; }
+}

@@ -3,6 +3,7 @@
 // browser can't run the workbench.
 
 import { createFoundry } from './melting/foundry.js';
+import { createStudio } from './diamond/studio.js';
 
 function supportsCanvas() {
   try { return !!document.createElement('canvas').getContext('2d'); } catch { return false; }
@@ -32,6 +33,17 @@ function boot() {
   } catch (err) {
     console.error('Melting Pot failed to start, showing static content', err);
     root.classList.add('mp-static');
+  }
+
+  // Chapter Two — the Diamond Studio (independent; its own failure never breaks the pot).
+  const studioMount = document.getElementById('ds-studio');
+  if (studioMount) {
+    try {
+      window.__diamondstudio = createStudio(studioMount, { contactUrl });
+    } catch (err) {
+      console.error('Diamond Studio failed to start, showing static content', err);
+      root.classList.add('ds-static');
+    }
   }
 }
 
