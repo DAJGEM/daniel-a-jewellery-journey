@@ -17,6 +17,8 @@ import { createStonesAct } from './acts/act07-stones.js';
 import { createMicroscopeAct } from './acts/act08-microscope.js';
 import { createTestAct } from './acts/act09-test.js';
 import { createShowroomAct } from './acts/act10-showroom.js';
+import { createHud } from './ui/hud.js';
+import { createAudio } from './ui/audio.js';
 
 // Dev-only: `?gallery=1` renders every form + a particle kind for eyeballing.
 function galleryAct(sectionEl) {
@@ -144,8 +146,18 @@ function boot() {
       if (builders[i]) stage.registerAct(builders[i](el));
     });
 
-    wireScroll(stage);
+    const hud = createHud(root, sections);
+    createAudio(root);
+
+    // Point every service link at the configured contact/booking page.
+    const contactHref = (window.JOURNEY_CONFIG && window.JOURNEY_CONFIG.contactUrl) || '/contact';
+    root.querySelectorAll('.journey-link[data-link="contact"]').forEach((a) => {
+      a.setAttribute('href', contactHref);
+    });
+
+    wireScroll(stage, (i) => hud.setActive(i));
     stage.setActive('hero');
+    hud.setActive(0);
 
     document.getElementById('begin-journey')?.addEventListener('click', () => {
       scrollToSection(sections[1]);

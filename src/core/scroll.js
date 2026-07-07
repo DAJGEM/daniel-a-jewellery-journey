@@ -10,14 +10,14 @@ gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
 
 export { gsap, ScrollTrigger };
 
-export function wireScroll(stage) {
-  stage.getActs().forEach((act) => {
+export function wireScroll(stage, onActive) {
+  stage.getActs().forEach((act, index) => {
     ScrollTrigger.create({
       trigger: act.sectionEl,
       start: 'top 60%',
       end: 'bottom 40%',
-      onEnter: () => stage.setActive(act.id),
-      onEnterBack: () => stage.setActive(act.id),
+      onEnter: () => { stage.setActive(act.id); onActive?.(index); },
+      onEnterBack: () => { stage.setActive(act.id); onActive?.(index); },
       onUpdate: (self) => { act.progress = self.progress; },
     });
   });
