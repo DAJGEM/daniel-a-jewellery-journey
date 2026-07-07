@@ -33,14 +33,19 @@ function prongs(THREE, metal, r) {
 
 function buildRing(THREE, opts, metal) {
   const g = new THREE.Group();
+  // Band lies flat (hole facing up); the stone is seated on the front of the
+  // band at the 12-o'clock position so it rides with the ring as it turns.
   const band = new THREE.Mesh(new THREE.TorusGeometry(1, 0.12, 24, 96), metal);
   band.rotation.x = Math.PI / 2;
   g.add(band);
   g.userData.engraveTarget = band;
   if (opts.stoneKey) {
     const gem = gemMesh(THREE, opts.stoneKey, opts.stoneCarat || 1);
-    gem.position.set(0, 1.02, 0);
-    g.add(gem, prongs(THREE, metal, gem.userData.gemRadius).translateY(1.0));
+    const seat = gem.userData.gemRadius * 0.9;
+    gem.position.set(0, 0.12 + seat, 1.0);
+    const p = prongs(THREE, metal, gem.userData.gemRadius);
+    p.position.set(0, 0.12, 1.0);
+    g.add(gem, p);
   }
   return g;
 }

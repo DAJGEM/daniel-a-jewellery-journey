@@ -12,6 +12,11 @@ import { createMineAct } from './acts/act02-mine.js';
 import { createPurifyAct } from './acts/act03-purify.js';
 import { createAlloyAct } from './acts/act04-alloy.js';
 import { createCastAct } from './acts/act05-cast.js';
+import { createFinishAct } from './acts/act06-finish.js';
+import { createStonesAct } from './acts/act07-stones.js';
+import { createMicroscopeAct } from './acts/act08-microscope.js';
+import { createTestAct } from './acts/act09-test.js';
+import { createShowroomAct } from './acts/act10-showroom.js';
 
 // Dev-only: `?gallery=1` renders every form + a particle kind for eyeballing.
 function galleryAct(sectionEl) {
@@ -122,19 +127,21 @@ function boot() {
       return;
     }
 
-    // Real acts, section by section. Later acts arrive in the next batch and
-    // fall back to a placeholder stub until then.
+    // All ten acts, section by section.
     const builders = [
       (el) => createHeroAct(el),
       (el) => createMineAct(el, state),
       (el) => createPurifyAct(el, state),
       (el) => createAlloyAct(el, state),
       (el) => createCastAct(el, state),
+      (el) => createFinishAct(el, state),
+      (el) => createStonesAct(el, state),
+      (el) => createMicroscopeAct(el, state),
+      (el) => createTestAct(el, state),
+      (el) => createShowroomAct(el, state),
     ];
-    const stubColours = [0xf3cb7a, 0xe9e8e4, 0xe7a186, 0x9fd0ff, 0xf3cb7a];
     sections.forEach((el, i) => {
       if (builders[i]) stage.registerAct(builders[i](el));
-      else stage.registerAct(makeStubAct('stub-' + i, el, stubColours[i % stubColours.length]));
     });
 
     wireScroll(stage);
