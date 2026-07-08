@@ -57,22 +57,39 @@ ${content}
 `,
   );
 
-  // Paste-ready Squarespace code block.
+  // Paste-ready Squarespace code block. A tiny loader reads the current version
+  // from version.txt (fetched uncached) and loads the engine with that version,
+  // so every deploy shows up immediately without re-pasting or hard-refreshing.
   writeFileSync(
     'dist/code-block.html',
-    `<!-- The Journey of Gold — Daniel A Jewellery. Paste this whole file into one
-     Squarespace Code block (HTML). Content edits happen in the GitHub repo,
-     not here — this block only needs re-pasting if this comment says so. -->
+    `<!-- Forge & Facet — Daniel A Jewellery. Paste this whole file into ONE
+     Squarespace Code block (HTML). It self-updates from GitHub on every deploy;
+     only re-paste if the inline content/markup below changes. -->
 ${FONTS}
-<link rel="stylesheet" href="${ASSET_BASE}/journey.css">
 ${content}
-<script>window.JOURNEY_CONFIG = { contactUrl: '/contact' };</script>
-<script src="${ASSET_BASE}/journey.js" defer></script>
+<script>
+window.JOURNEY_CONFIG = { contactUrl: '/contact' };
+(function () {
+  var base = '${ASSET_BASE}/';
+  function load(v) {
+    var q = v ? '?v=' + v : '';
+    var l = document.createElement('link'); l.rel = 'stylesheet'; l.href = base + 'journey.css' + q; document.head.appendChild(l);
+    var s = document.createElement('script'); s.src = base + 'journey.js' + q; s.defer = true; document.body.appendChild(s);
+  }
+  fetch(base + 'version.txt?t=' + Date.now())
+    .then(function (r) { return r.ok ? r.text() : ''; })
+    .then(function (v) { load((v || '').trim()); })
+    .catch(function () { load(''); });
+})();
+</script>
 `,
   );
 }
 
 mkdirSync('dist', { recursive: true });
+
+// Version stamp — the code-block loader reads this to bust caches on each deploy.
+writeFileSync('dist/version.txt', String(Date.now()));
 
 // Ship the real diamond photos alongside the bundle.
 if (existsSync('assets/diamonds')) {
