@@ -4,7 +4,7 @@
 // `node build.mjs --watch` also serves the repo root on :8123.
 
 import * as esbuild from 'esbuild';
-import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
+import { readFileSync, writeFileSync, mkdirSync, cpSync, existsSync } from 'node:fs';
 
 const watch = process.argv.includes('--watch');
 
@@ -73,6 +73,11 @@ ${content}
 }
 
 mkdirSync('dist', { recursive: true });
+
+// Ship the real diamond photos alongside the bundle.
+if (existsSync('assets/diamonds')) {
+  cpSync('assets/diamonds', 'dist/diamonds', { recursive: true });
+}
 
 if (watch) {
   const ctxJs = await esbuild.context(buildOptions);

@@ -18,6 +18,9 @@ export const SHAPES = {
 
 export const SHAPE_ORDER = ['round', 'oval', 'cushion', 'princess', 'radiant', 'pear', 'marquise', 'heart', 'emerald', 'asscher'];
 
+// Shapes with a real photographic image (the rest fall back to the drawn view).
+export const SHAPE_PHOTOS = ['round', 'oval', 'cushion', 'princess', 'radiant'];
+
 // Cut grades — the single biggest driver of how a diamond performs.
 export const CUTS = {
   ideal:     { name: 'Ideal',     lightReturn: 0.98, price: 1.15, note: 'Cut to maximise light return — every ray that enters comes back out through the top as brilliance and fire.' },

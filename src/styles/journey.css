@@ -255,3 +255,10 @@
 .mp-science { background: rgba(207,214,223,0.06); border-left: 3px solid var(--platinum); border-radius: 8px; padding: 0.7rem 1rem; margin-bottom: 0.8rem; }
 .mp-science-by { display: block; font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--platinum) !important; margin-bottom: 0.2rem; }
 .mp-science p { margin: 0; color: var(--paper) !important; font-size: 0.9rem; }
+
+/* Diamond Studio — real photos */
+.ds-media { position: relative; flex: 1; min-height: 260px; }
+.ds-media .ds-canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+.ds-photo { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; transition: filter 0.4s ease, transform 0.4s ease; mix-blend-mode: lighten; }
+.ds-shape-mini-img { width: 46px; height: 46px; object-fit: cover; border-radius: 7px; display: block; }
+.ds-cmp-img { width: 100%; aspect-ratio: 1; object-fit: cover; border: 1px solid var(--line); border-radius: 10px; background: #05060a; display: block; mix-blend-mode: lighten; }
