@@ -16,9 +16,12 @@ export const SHAPES = {
   asscher:  { name: 'Asscher',         lw: 1.00, brilliance: 0.64, facets: 'step',      blurb: 'A square emerald cut with an Art-Deco, windmill flash. Elegant and vintage; also shows clarity.' },
 };
 
-export const SHAPE_ORDER = ['round', 'oval', 'cushion', 'princess', 'radiant', 'pear', 'marquise', 'heart', 'emerald', 'asscher'];
+// Shapes shown in the studio — only the ones we have real photographs of.
+// (The other cuts stay defined above so the solver/tests still know them; add an
+// id back here once its photo exists.)
+export const SHAPE_ORDER = ['round', 'oval', 'cushion', 'princess', 'radiant'];
 
-// Shapes with a real photographic image (the rest fall back to the drawn view).
+// Shapes with a real photographic image.
 export const SHAPE_PHOTOS = ['round', 'oval', 'cushion', 'princess', 'radiant'];
 
 // Cut grades — the single biggest driver of how a diamond performs.
